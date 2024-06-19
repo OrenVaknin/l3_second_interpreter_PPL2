@@ -8,7 +8,7 @@ import { isAppExp, isBoolExp, isDefineExp, isIfExp, isLitExp, isNumExp,
 import { makeBoolExp, makeLitExp, makeNumExp, makeProcExp, makeStrExp } from "./L3-ast";
 import { parseL3Exp } from "./L3-ast";
 import { applyEnv, makeEmptyEnv, makeEnv, Env } from "./L3-env-sub";
-import { isClosure, makeClosure, Closure, Value, Class, makeClass,makeObjectValue, isClass, ObjectValue ,isObjectValue } from "./L3-value";
+import { isClosure, makeClosure, Closure, Value, Class, makeClass,makeObjectValue, isClass, ObjectValue ,isObjectValue, ClassToString, isSymbolSExp } from "./L3-value";
 import { first, rest, isEmpty, List, isNonEmptyList } from '../shared/list';
 import { isBoolean, isNumber, isString } from "../shared/type-predicates";
 import { Result, makeOk, makeFailure, bind, mapResult, mapv } from "../shared/result";
@@ -43,8 +43,10 @@ const L3applicativeEval = (exp: CExp, env: Env): Result<Value> =>
 export const isTrueValue = (x: Value): boolean =>
     ! (x === false);
 
-const evalClass = (exp: ClassExp, env: Env): Result<Class> => 
-    makeOk(makeClass(exp.fields, exp.methods));
+const evalClass = (exp: ClassExp, env: Env): Result<Class> => {
+    return makeOk(makeClass(exp.fields, exp.methods));
+}
+    
 
 const evalIf = (exp: IfExp, env: Env): Result<Value> =>
     bind(L3applicativeEval(exp.test, env), (test: Value) => 
@@ -89,18 +91,28 @@ const applyClass = (proc: Class , args: Value[], env: Env): Result<Value> => {
 
 
 const applyObject = (proc: ObjectValue, args: Value[], env: Env): Result<Value> => {
-    const theMethod = filter((method:Binding) => method.var.var === args[0],proc.Class.methods);
+    if(!isNonEmptyList<Value>(args)){
+        return makeFailure("No method name was given");
+    }
+    if (!isSymbolSExp(args[0])) {
+        return makeFailure("First argument isn't method name")
+    }
+    const methodName = args[0].val;
+    const theMethod = filter((method:Binding) => method.var.var === methodName,proc.Class.methods);
+    
     if(theMethod.length === 0)
-        return makeFailure(`Unrecognized method: ${args[0]}`);
+        return makeFailure(`Unrecognized method: ${args[0].val}`);
     if(isProcExp(theMethod[0].val)){
-        const methodBody = theMethod[0].val.body;
+        const methodBody = theMethod[0].val;
         const classFields = map((x:VarDecl): string => x.var,proc.Class.fields);
         const objectFields = map(valueToLitExp,proc.fieldValues);
-        const fixedFields = substitute(methodBody,classFields,objectFields);
-        const closure = makeClosure(theMethod[0].val.args, fixedFields);
-        return applyClosure(closure,args.slice(1),env);
+        const fixedFields = substitute([methodBody],classFields,objectFields);
+        if(isProcExp(fixedFields[0])){
+            const closure = makeClosure(theMethod[0].val.args, fixedFields[0].body);
+            return applyClosure(closure,args.slice(1),env); 
+        }
     }
-    return makeFailure(`Unrecognized method: ${args[0]}`);
+    return makeFailure(`Unrecognized method: ${args[0].val}`);
 }
 
 // Evaluate a sequence of expressions (in a program)
