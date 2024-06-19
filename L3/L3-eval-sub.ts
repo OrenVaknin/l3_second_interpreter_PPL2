@@ -22,7 +22,6 @@ import { format } from "../shared/format";
 // Eval functions
 
 const L3applicativeEval = (exp: CExp, env: Env): Result<Value> =>
-    isClassExp(exp) ? evalClass(exp, env) :
     isNumExp(exp) ? makeOk(exp.val) : 
     isBoolExp(exp) ? makeOk(exp.val) :
     isStrExp(exp) ? makeOk(exp.val) :
@@ -31,6 +30,7 @@ const L3applicativeEval = (exp: CExp, env: Env): Result<Value> =>
     isLitExp(exp) ? makeOk(exp.val) :
     isIfExp(exp) ? evalIf(exp, env) :
     isProcExp(exp) ? evalProc(exp, env) :
+    isClassExp(exp) ? evalClass(exp, env) :
     isAppExp(exp) ? bind(L3applicativeEval(exp.rator, env), (rator: Value) =>
                         bind(mapResult(param => 
                             L3applicativeEval(param, env), 
@@ -71,7 +71,6 @@ const valueToLitExp = (v: Value): NumExp | BoolExp | StrExp | LitExp | PrimOp | 
     isString(v) ? makeStrExp(v) :
     isPrimOp(v) ? v :
     isClosure(v) ? makeProcExp(v.params, v.body) :
-    isClass(v) ? makeClassExp(v.fields, v.methods) :
     makeLitExp(v);
 
 const applyClosure = (proc: Closure, args: Value[], env: Env): Result<Value> => {

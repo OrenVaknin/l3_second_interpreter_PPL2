@@ -10,7 +10,7 @@ import { isArray, isNumber, isString } from '../shared/type-predicates';
 export type Value = SExpValue ;
 
 export type Functional = PrimOp | Closure | Class | ObjectValue ;
-export const isFunctional = (x: any): x is Functional => isPrimOp(x) || isClosure(x) || isClass(x) || isClosure(x);
+export const isFunctional = (x: any): x is Functional => isPrimOp(x) || isClosure(x);
 
 // ========================================================
 // Closure for L4 - the field env is added.
