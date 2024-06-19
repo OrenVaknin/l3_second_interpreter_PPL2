@@ -94,7 +94,6 @@ export const closureToString = (c: Closure): string =>
     // `<Closure ${c.params} ${L3unparse(c.body)}>`
     `<Closure ${c.params} ${c.body}>`
 export const ClassToString = (c: Class): string =>
-    // `<Closure ${c.params} ${L3unparse(c.body)}>`
     `Class`   
 export const ObjectValueToString = (c: ObjectValue): string =>
     // `<Closure ${c.params} ${L3unparse(c.body)}>`
