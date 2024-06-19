@@ -14,7 +14,7 @@ export const class2proc = (exp: ClassExp): ProcExp => {
     const createMethodIfExp = (method: Binding, acc: CExp): CExp =>
         makeIfExp(
             makeAppExp(makePrimOp("eq?"), [makeVarRef("msg"), makeLitExp(`'${method.var.var}`)]),
-            method.val, // Directly use the method value
+            makeAppExp(method.val, []), // Directly use the method value
             acc
         );
 

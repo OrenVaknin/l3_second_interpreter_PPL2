@@ -5,19 +5,19 @@ import { map } from "ramda";
 import { isBoolExp, isCExp, isLitExp, isNumExp, isPrimOp, isStrExp, isVarRef,
          isAppExp, isDefineExp, isIfExp, isLetExp, isProcExp,
          Binding, VarDecl, CExp, Exp, IfExp, LetExp, ProcExp, Program,
-         parseL3Exp,  DefineExp} from "./L3-ast";
+         parseL3Exp,  DefineExp, ClassExp, isClassExp} from "./L3-ast";
 import { applyEnv, makeEmptyEnv, makeExtEnv, Env } from "./L3-env-env";
-import { isClosure, makeClosureEnv, Closure, Value } from "./L3-value";
+import { isClosure, makeClosure, Closure, Value, Class, makeClass,makeObjectValue, isClass, ObjectValue ,makeClosureEnv,isObjectValue } from "./L3-value";
 import { applyPrimitive } from "./evalPrimitive";
 import { allT, first, rest, isEmpty, isNonEmptyList } from "../shared/list";
 import { Result, makeOk, makeFailure, bind, mapResult } from "../shared/result";
 import { parse as p } from "../shared/parser";
-import { format } from "../shared/format";
-
+import { format } from "../shared/format"; 
 // ========================================================
 // Eval functions
 
 const applicativeEval = (exp: CExp, env: Env): Result<Value> =>
+    isClassExp(exp) ? evalClass(exp, env) :
     isNumExp(exp) ? makeOk(exp.val) :
     isBoolExp(exp) ? makeOk(exp.val) :
     isStrExp(exp) ? makeOk(exp.val) :
@@ -37,6 +37,9 @@ const applicativeEval = (exp: CExp, env: Env): Result<Value> =>
 
 export const isTrueValue = (x: Value): boolean =>
     ! (x === false);
+
+const evalClass = (exp: ClassExp, env: Env): Result<Class> =>
+    makeOk(makeClass(exp.fields, exp.methods));
 
 const evalIf = (exp: IfExp, env: Env): Result<Value> =>
     bind(applicativeEval(exp.test, env), (test: Value) => 
