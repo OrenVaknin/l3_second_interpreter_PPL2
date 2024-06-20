@@ -96,7 +96,6 @@ export const closureToString = (c: Closure): string =>
 export const ClassToString = (c: Class): string =>
     `Class`   
 export const ObjectValueToString = (c: ObjectValue): string =>
-    // `<Closure ${c.params} ${L3unparse(c.body)}>`
     `Object` 
 export const compoundSExpToArray = (cs: CompoundSExp, res: string[]): string[] | { s1: string[], s2: string } =>
     isEmptySExp(cs.val2) ? append(valueToString(cs.val1), res) :

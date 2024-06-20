@@ -57,20 +57,3 @@ const rewriteAllClassCExp = (exp: CExp): CExp =>
     isLetExp(exp) ? makeLetExp(exp.bindings, map(rewriteAllClassCExp, exp.body)) :
     isClassExp(exp) ? class2proc(exp) :
     exp;
-
-/* export const lexTransform = (exp: Exp | Program): Result<Exp | Program> => {
-    if (isProgram(exp)) {
-        return bind(mapResult(lexTransform, exp.exps), (exps: (Exp | Program)[]) => {
-            const filteredExps = exps.filter((e): e is Exp => isExp(e)); // Filter out non-Exp elements
-            return makeOk({ ...exp, exps: filteredExps });
-        });
-    } else if (isDefineExp(exp)) {
-        return bind(lexTransform(exp.val), (val: Exp | Program) => makeOk({ ...exp, val: val as Exp }));
-    } else if (isClassExp(exp)) {
-        return makeOk(class2proc(exp));
-    } else if (isCExp(exp)) {
-        return mapCExp(lexTransform, exp);
-    } else {
-        return makeOk(exp);
-    }
-}; */
